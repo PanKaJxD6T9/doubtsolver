@@ -11,11 +11,11 @@ export default function HeroComponent() {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    console.log("Searching for:", searchQuery);
-    // Here you would implement actual search functionality
-  };
+  // const handleSearch = (e) => {
+  //   e.preventDefault();
+  //   console.log("Searching for:", searchQuery);
+  //   // Here you would implement actual search functionality
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-600 to-indigo-700">
