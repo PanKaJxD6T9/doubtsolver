@@ -81,12 +81,8 @@ export default function Signup() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Redirect based on role
-      if (data.user.role === 'teacher') {
-        navigate('/dashboard/teacher');
-      } else {
-        navigate('/teachers');
-      }
+      // Navigate to home page instead of dashboard
+      navigate('/');
     } catch (err) {
       console.error('Signup error:', err);
       setError(err.message || 'An error occurred during signup');

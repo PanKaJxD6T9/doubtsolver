@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Clock, CheckCircle, XCircle, Users, Send, ChevronDown } from 'lucide-react';
+import { MessageSquare, Clock, CheckCircle, XCircle, Users, Send, ChevronDown, LogOut } from 'lucide-react';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
@@ -11,6 +11,12 @@ export default function StudentDashboard() {
   const [replyingTo, setReplyingTo] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedDoubts, setExpandedDoubts] = useState(new Set());
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/');
+  };
 
   useEffect(() => {
     fetchDoubts();
@@ -118,6 +124,26 @@ export default function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation Bar */}
+      {/* <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <span className="text-xl font-bold text-blue-600">Student Dashboard</span>
+            </div>
+            <div className="flex items-center">
+              <button
+                onClick={handleLogout}
+                className="ml-4 px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav> */}
+
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -126,13 +152,22 @@ export default function StudentDashboard() {
               <MessageSquare className="h-8 w-8 text-indigo-600" />
               <span className="ml-2 text-xl font-bold text-gray-900">My Doubts</span>
             </div>
-            <button
-              onClick={() => navigate('/teachers')}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <Users className="h-5 w-5 mr-2" />
-              Find Teachers
-            </button>
+            <div className="flex items-center">
+              <button
+                onClick={() => navigate('/teachers')}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <Users className="h-5 w-5 mr-2" />
+                Find Teachers
+              </button>
+              <button
+                onClick={handleLogout}
+                className="ml-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <LogOut className="h-5 w-5 mr-2" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </header>

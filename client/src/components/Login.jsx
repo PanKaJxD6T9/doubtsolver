@@ -49,12 +49,8 @@ export default function Login() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Navigate based on role
-      if (data.user.role === 'teacher') {
-        navigate('/dashboard/teacher');
-      } else {
-        navigate('/teachers');
-      }
+      // Navigate to home page instead of dashboard
+      navigate('/');
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'An error occurred during login');

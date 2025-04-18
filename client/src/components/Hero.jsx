@@ -1,11 +1,39 @@
 import React from 'react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, Menu, X, LogIn, UserPlus, HelpCircle, BookOpen, MessageSquare, Home } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, Menu, X, LogIn, UserPlus, HelpCircle, BookOpen, MessageSquare, Home, LayoutDashboard } from 'lucide-react';
 
 export default function HeroComponent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setIsAuthenticated(true);
+        setUserRole(user.role);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+
+  const handleDashboardClick = () => {
+    if (userRole === 'teacher') {
+      navigate('/dashboard/teacher');
+    } else {
+      navigate('/dashboard/student');
+    }
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -46,14 +74,26 @@ export default function HeroComponent() {
               </a> */}
               
               {/* Auth Links */}
-              <Link to="/login" className="px-4 py-2 rounded-md bg-white text-blue-600 hover:bg-blue-100 flex items-center gap-1">
-                <LogIn className="w-4 h-4" />
-                <span>Login</span>
-              </Link>
-              <Link to="/signup" className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-400 flex items-center gap-1">
-                <UserPlus className="w-4 h-4" />
-                <span>Sign Up</span>
-              </Link>
+              {!isAuthenticated ? (
+                <>
+                  <Link to="/login" className="px-4 py-2 rounded-md bg-white text-blue-600 hover:bg-blue-100 flex items-center gap-1">
+                    <LogIn className="w-4 h-4" />
+                    <span>Login</span>
+                  </Link>
+                  <Link to="/signup" className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-400 flex items-center gap-1">
+                    <UserPlus className="w-4 h-4" />
+                    <span>Sign Up</span>
+                  </Link>
+                </>
+              ) : (
+                <button 
+                  onClick={handleDashboardClick}
+                  className="px-4 py-2 rounded-md bg-white text-blue-600 hover:bg-blue-100 flex items-center gap-1"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span>Dashboard</span>
+                </button>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -83,16 +123,26 @@ export default function HeroComponent() {
                     <span>Ask Doubt</span>
                   </a> */}
                   
-                  <div className="border-t border-gray-200 pt-2 flex flex-col space-y-2">
-                    <Link to="/login" className="w-full px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-center flex items-center justify-center gap-2">
-                      <LogIn className="w-4 h-4" />
-                      <span>Login</span>
-                    </Link>
-                    <Link to="/signup" className="w-full px-4 py-2 rounded-md bg-blue-100 text-blue-600 hover:bg-blue-200 text-center flex items-center justify-center gap-2">
-                      <UserPlus className="w-4 h-4" />
-                      <span>Sign Up</span>
-                    </Link>
-                  </div>
+                  {!isAuthenticated ? (
+                    <div className="border-t border-gray-200 pt-2 flex flex-col space-y-2">
+                      <Link to="/login" className="w-full px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-center flex items-center justify-center gap-2">
+                        <LogIn className="w-4 h-4" />
+                        <span>Login</span>
+                      </Link>
+                      <Link to="/signup" className="w-full px-4 py-2 rounded-md bg-blue-100 text-blue-600 hover:bg-blue-200 text-center flex items-center justify-center gap-2">
+                        <UserPlus className="w-4 h-4" />
+                        <span>Sign Up</span>
+                      </Link>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={handleDashboardClick}
+                      className="w-full px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-center flex items-center justify-center gap-2"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span>Dashboard</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
