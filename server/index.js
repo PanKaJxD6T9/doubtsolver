@@ -16,7 +16,7 @@ app.use(cors({
 }));
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/doubtSolver', {
+mongoose.connect('mongodb+srv://workpankaj01:pankaj00sh@cluster0.08ygkmm.mongodb.net/', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
