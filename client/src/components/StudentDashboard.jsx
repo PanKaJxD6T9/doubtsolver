@@ -117,29 +117,31 @@ export default function StudentDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <header className="bg-white shadow-sm mb-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">My Doubts</h1>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate('/teachers')}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <Users className="h-5 w-5 mr-2" />
-                Find Teachers
-              </button>
+            <div className="flex items-center">
+              <MessageSquare className="h-8 w-8 text-indigo-600" />
+              <span className="ml-2 text-xl font-bold text-gray-900">My Doubts</span>
             </div>
+            <button
+              onClick={() => navigate('/teachers')}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <Users className="h-5 w-5 mr-2" />
+              Find Teachers
+            </button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {doubts.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12 bg-white rounded-lg shadow">
             <MessageSquare className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No doubts yet</h3>
+            <h3 className="mt-2 text-lg font-medium text-gray-900">No doubts yet</h3>
             <p className="mt-1 text-sm text-gray-500">Get started by asking a doubt to a teacher.</p>
             <div className="mt-6">
               <button
@@ -152,11 +154,11 @@ export default function StudentDashboard() {
             </div>
           </div>
         ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {doubts.map((doubt) => (
-                <li key={doubt._id} className="p-6">
-                  <div className="flex items-start">
+          <div className="space-y-6">
+            {doubts.map((doubt) => (
+              <div key={doubt._id} className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="p-6">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(doubt.status)}`}>
@@ -166,9 +168,14 @@ export default function StudentDashboard() {
                         <h3 className="text-lg font-medium text-gray-900">{doubt.subject}</h3>
                       </div>
 
-                      <div className="mt-2">
-                        <p className="text-sm text-gray-500">Topic: {doubt.topic}</p>
-                        <p className="mt-1 text-sm text-gray-700">{doubt.description}</p>
+                      <div className="mt-4">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <span className="font-medium text-gray-700">Topic:</span>
+                          <span className="ml-2">{doubt.topic}</span>
+                        </div>
+                        <p className="mt-2 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
+                          {doubt.description}
+                        </p>
                       </div>
 
                       {/* Conversation Thread */}
@@ -194,7 +201,7 @@ export default function StudentDashboard() {
                             {expandedDoubts.has(doubt._id) ? 'Hide Conversation' : `Show Conversation (${doubt.replies.length} messages)`}
                           </button>
                           {expandedDoubts.has(doubt._id) && (
-                            <div className="mt-2 space-y-4">
+                            <div className="mt-4 space-y-4">
                               {doubt.replies.map((reply, index) => (
                                 <div 
                                   key={index}
@@ -206,7 +213,7 @@ export default function StudentDashboard() {
                                     reply.sender.role === 'teacher' 
                                       ? 'bg-blue-50 text-blue-700' 
                                       : 'bg-green-50 text-green-700'
-                                  } p-4 rounded-lg`}>
+                                  } p-4 rounded-lg shadow-sm`}>
                                     <div className="flex items-center space-x-2 mb-1">
                                       <div className={`h-8 w-8 rounded-full ${
                                         reply.sender.role === 'teacher' ? 'bg-blue-100' : 'bg-green-100'
@@ -235,7 +242,7 @@ export default function StudentDashboard() {
 
                       {/* Reply Form */}
                       {doubt.status !== 'rejected' && (
-                        <div className="mt-4">
+                        <div className="mt-6">
                           {replyingTo === doubt._id ? (
                             <div className="space-y-3">
                               <textarea
@@ -285,21 +292,27 @@ export default function StudentDashboard() {
                           )}
                         </div>
                       )}
+                    </div>
+                  </div>
 
-                      <div className="mt-2 text-xs text-gray-500">
-                        Asked to: {doubt.teacher.name}
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-700">Asked to:</span>
+                        <span className="ml-2">{doubt.teacher.name}</span>
                       </div>
-                      <div className="text-xs text-gray-400">
-                        Asked on: {new Date(doubt.createdAt).toLocaleDateString()}
+                      <div className="flex items-center">
+                        <span className="font-medium text-gray-700">Asked on:</span>
+                        <span className="ml-2">{new Date(doubt.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
-                </li>
-              ))}
-            </ul>
+                </div>
+              </div>
+            ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
