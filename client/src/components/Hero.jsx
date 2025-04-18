@@ -185,12 +185,12 @@ export default function HeroComponent() {
             
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center md:justify-start">
-              <Link to="/ask" className="px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 text-center">
+              <Link to="/teachers" className="px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 text-center">
                 Ask a Question
               </Link>
-              <Link to="/browse" className="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-400 text-center">
+              {/* <Link to="/browse" className="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-400 text-center">
                 Browse Topics
-              </Link>
+              </Link> */}
             </div>
           </div>
           
