@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, Clock, CheckCircle, XCircle, Users, Send } from 'lucide-react';
+import { MessageSquare, Clock, CheckCircle, XCircle, Users, Send, ChevronDown } from 'lucide-react';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
@@ -10,6 +10,7 @@ export default function StudentDashboard() {
   const [replyText, setReplyText] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expandedDoubts, setExpandedDoubts] = useState(new Set());
 
   useEffect(() => {
     fetchDoubts();
@@ -172,40 +173,63 @@ export default function StudentDashboard() {
 
                       {/* Conversation Thread */}
                       {doubt.replies && doubt.replies.length > 0 && (
-                        <div className="mt-4 space-y-4">
-                          {doubt.replies.map((reply, index) => (
-                            <div 
-                              key={index}
-                              className={`flex items-start ${
-                                reply.sender.role === 'teacher' ? 'justify-start' : 'justify-end'
+                        <div className="mt-4">
+                          <button
+                            onClick={() => {
+                              const newExpanded = new Set(expandedDoubts);
+                              if (newExpanded.has(doubt._id)) {
+                                newExpanded.delete(doubt._id);
+                              } else {
+                                newExpanded.add(doubt._id);
+                              }
+                              setExpandedDoubts(newExpanded);
+                            }}
+                            className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+                          >
+                            <ChevronDown
+                              className={`h-4 w-4 mr-1 transition-transform duration-200 ${
+                                expandedDoubts.has(doubt._id) ? 'transform rotate-180' : ''
                               }`}
-                            >
-                              <div className={`max-w-[80%] ${
-                                reply.sender.role === 'teacher' 
-                                  ? 'bg-blue-50 text-blue-700' 
-                                  : 'bg-green-50 text-green-700'
-                              } p-4 rounded-lg`}>
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <div className={`h-8 w-8 rounded-full ${
-                                    reply.sender.role === 'teacher' ? 'bg-blue-100' : 'bg-green-100'
-                                  } flex items-center justify-center`}>
-                                    <span className={`font-medium ${
-                                      reply.sender.role === 'teacher' ? 'text-blue-600' : 'text-green-600'
-                                    }`}>
-                                      {reply.sender.name.charAt(0)}
-                                    </span>
+                            />
+                            {expandedDoubts.has(doubt._id) ? 'Hide Conversation' : `Show Conversation (${doubt.replies.length} messages)`}
+                          </button>
+                          {expandedDoubts.has(doubt._id) && (
+                            <div className="mt-2 space-y-4">
+                              {doubt.replies.map((reply, index) => (
+                                <div 
+                                  key={index}
+                                  className={`flex items-start ${
+                                    reply.sender.role === 'teacher' ? 'justify-start' : 'justify-end'
+                                  }`}
+                                >
+                                  <div className={`max-w-[80%] ${
+                                    reply.sender.role === 'teacher' 
+                                      ? 'bg-blue-50 text-blue-700' 
+                                      : 'bg-green-50 text-green-700'
+                                  } p-4 rounded-lg`}>
+                                    <div className="flex items-center space-x-2 mb-1">
+                                      <div className={`h-8 w-8 rounded-full ${
+                                        reply.sender.role === 'teacher' ? 'bg-blue-100' : 'bg-green-100'
+                                      } flex items-center justify-center`}>
+                                        <span className={`font-medium ${
+                                          reply.sender.role === 'teacher' ? 'text-blue-600' : 'text-green-600'
+                                        }`}>
+                                          {reply.sender.name.charAt(0)}
+                                        </span>
+                                      </div>
+                                      <span className="text-sm font-medium">
+                                        {reply.sender.name}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm">{reply.message}</p>
+                                    <p className="text-xs mt-1 opacity-75">
+                                      {new Date(reply.createdAt).toLocaleString()}
+                                    </p>
                                   </div>
-                                  <span className="text-sm font-medium">
-                                    {reply.sender.name}
-                                  </span>
                                 </div>
-                                <p className="text-sm">{reply.message}</p>
-                                <p className="text-xs mt-1 opacity-75">
-                                  {new Date(reply.createdAt).toLocaleString()}
-                                </p>
-                              </div>
+                              ))}
                             </div>
-                          ))}
+                          )}
                         </div>
                       )}
 
