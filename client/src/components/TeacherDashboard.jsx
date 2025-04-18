@@ -40,19 +40,8 @@ export default function TeacherDashboard() {
   const [selectedDoubt, setSelectedDoubt] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
-
-  // Sample data for demonstration
-  const notifications = [
-    { id: 1, message: "New student registration", time: "5 minutes ago" },
-    { id: 2, message: "New doubt posted in Mathematics", time: "1 hour ago" },
-    { id: 3, message: "Student feedback received", time: "2 hours ago" }
-  ];
-
-  const recentActivities = [
-    { id: 1, type: 'doubt_resolved', student: 'John Doe', subject: 'Mathematics', time: '2 hours ago' },
-    { id: 2, type: 'new_student', student: 'Alice Smith', time: '3 hours ago' },
-    { id: 3, type: 'feedback', student: 'Bob Wilson', rating: 5, time: '5 hours ago' }
-  ];
+  const [notifications, setNotifications] = useState([]);
+  const [recentActivities, setRecentActivities] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,8 +88,31 @@ export default function TeacherDashboard() {
         const doubtsData = await doubtsResponse.json();
         setDoubts(doubtsData);
 
+        // Generate notifications and activities from doubts
+        const newNotifications = doubtsData
+          .filter(doubt => doubt.status === 'pending')
+          .map(doubt => ({
+            id: doubt._id,
+            message: `New doubt posted in ${doubt.subject}`,
+            time: new Date(doubt.createdAt).toLocaleString()
+          }));
+
+        const newActivities = doubtsData
+          .slice(0, 5) // Get last 5 doubts
+          .map(doubt => ({
+            id: doubt._id,
+            type: doubt.status === 'accepted' ? 'doubt_resolved' : 'new_doubt',
+            student: doubt.student.name,
+            subject: doubt.subject,
+            time: new Date(doubt.createdAt).toLocaleString()
+          }));
+
+        setNotifications(newNotifications);
+        setRecentActivities(newActivities);
+
       } catch (error) {
         console.error('Error:', error);
+        setError(error.message);
         navigate('/login');
       } finally {
         setIsLoading(false);
@@ -254,17 +266,25 @@ export default function TeacherDashboard() {
                   className="relative p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <Bell className="h-6 w-6" />
-                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                  {notifications.length > 0 && (
+                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                  )}
                 </button>
 
                 {showNotifications && (
                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 z-20">
-                    {notifications.map(notification => (
-                      <div key={notification.id} className="px-4 py-2 hover:bg-gray-50">
-                        <p className="text-sm text-gray-900">{notification.message}</p>
-                        <p className="text-xs text-gray-500">{notification.time}</p>
+                    {notifications.length > 0 ? (
+                      notifications.map(notification => (
+                        <div key={notification.id} className="px-4 py-2 hover:bg-gray-50">
+                          <p className="text-sm text-gray-900">{notification.message}</p>
+                          <p className="text-xs text-gray-500">{notification.time}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-2">
+                        <p className="text-sm text-gray-500">No new notifications</p>
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
@@ -415,51 +435,53 @@ export default function TeacherDashboard() {
               <div className="p-6">
                 <div className="flow-root">
                   <ul className="-mb-8">
-                    {recentActivities.map((activity, activityIdx) => (
-                      <li key={activity.id}>
-                        <div className="relative pb-8">
-                          {activityIdx !== recentActivities.length - 1 ? (
-                            <span
-                              className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
-                              aria-hidden="true"
-                            />
-                          ) : null}
-                          <div className="relative flex space-x-3">
-                            <div>
-                              <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
-                                activity.type === 'doubt_resolved' ? 'bg-green-500' :
-                                activity.type === 'new_student' ? 'bg-blue-500' :
-                                'bg-yellow-500'
-                              }`}>
-                                {activity.type === 'doubt_resolved' ? (
-                                  <CheckCircle className="h-5 w-5 text-white" />
-                                ) : activity.type === 'new_student' ? (
-                                  <UserPlus className="h-5 w-5 text-white" />
-                                ) : (
-                                  <MessageSquare className="h-5 w-5 text-white" />
-                                )}
-                              </span>
-                            </div>
-                            <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                    {recentActivities.length > 0 ? (
+                      recentActivities.map((activity, activityIdx) => (
+                        <li key={activity.id}>
+                          <div className="relative pb-8">
+                            {activityIdx !== recentActivities.length - 1 ? (
+                              <span
+                                className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                                aria-hidden="true"
+                              />
+                            ) : null}
+                            <div className="relative flex space-x-3">
                               <div>
-                                <p className="text-sm text-gray-500">
+                                <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
+                                  activity.type === 'doubt_resolved' ? 'bg-green-500' : 'bg-blue-500'
+                                }`}>
                                   {activity.type === 'doubt_resolved' ? (
-                                    <>Resolved doubt from <span className="font-medium text-gray-900">{activity.student}</span> in {activity.subject}</>
-                                  ) : activity.type === 'new_student' ? (
-                                    <>New student <span className="font-medium text-gray-900">{activity.student}</span> registered</>
+                                    <CheckCircle className="h-5 w-5 text-white" />
                                   ) : (
-                                    <>Received {activity.rating}★ feedback from <span className="font-medium text-gray-900">{activity.student}</span></>
+                                    <MessageSquare className="h-5 w-5 text-white" />
                                   )}
-                                </p>
+                                </span>
                               </div>
-                              <div className="text-right text-sm whitespace-nowrap text-gray-500">
-                                {activity.time}
+                              <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                <div>
+                                  <p className="text-sm text-gray-500">
+                                    {activity.type === 'doubt_resolved' ? (
+                                      <>Resolved doubt from <span className="font-medium text-gray-900">{activity.student}</span> in {activity.subject}</>
+                                    ) : (
+                                      <>New doubt from <span className="font-medium text-gray-900">{activity.student}</span> in {activity.subject}</>
+                                    )}
+                                  </p>
+                                </div>
+                                <div className="text-right text-sm whitespace-nowrap text-gray-500">
+                                  {activity.time}
+                                </div>
                               </div>
                             </div>
                           </div>
+                        </li>
+                      ))
+                    ) : (
+                      <li>
+                        <div className="text-center text-gray-500 py-4">
+                          No recent activity
                         </div>
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
               </div>
@@ -467,6 +489,7 @@ export default function TeacherDashboard() {
           </div>
         </div>
 
+        {/* Doubts Section */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Doubt Requests</h2>
           <div className="flex justify-between items-center mb-8">
