@@ -392,6 +392,12 @@ app.post('/api/doubts', auth, checkRole('student'), async (req, res) => {
       .populate('student', 'name email')
       .populate('teacher', 'name email');
 
+    // Emit socket event for new doubt
+    io.emit('newDoubt', {
+      doubt: populatedDoubt,
+      teacherId: teacherId
+    });
+
     res.status(201).json(populatedDoubt);
   } catch (err) {
     console.error('Error creating doubt:', err);

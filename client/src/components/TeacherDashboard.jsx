@@ -145,15 +145,57 @@ export default function TeacherDashboard() {
       });
     });
 
+    // Listen for new doubts
+    socket.on('newDoubt', ({ doubt, teacherId }) => {
+      // Only add the doubt if it's assigned to this teacher
+      const currentTeacherId = JSON.parse(localStorage.getItem('user'))?.id;
+      if (teacherId === currentTeacherId) {
+        setDoubts(prevDoubts => [doubt, ...prevDoubts]);
+        
+        // Update stats
+        setStats(prevStats => ({
+          ...prevStats,
+          activeDoubts: prevStats.activeDoubts + 1
+        }));
+
+        // Add to notifications
+        setNotifications(prevNotifications => [{
+          id: doubt._id,
+          message: `New doubt posted in ${doubt.subject} by ${doubt.student.name}`,
+          time: new Date().toLocaleString()
+        }, ...prevNotifications]);
+
+        // Add to recent activities
+        setRecentActivities(prevActivities => [{
+          id: doubt._id,
+          type: 'new_doubt',
+          student: doubt.student.name,
+          subject: doubt.subject,
+          time: new Date().toLocaleString()
+        }, ...prevActivities.slice(0, 4)]);  // Keep only last 5 activities
+      }
+    });
+
     // Listen for new replies
     doubts.forEach(doubt => {
       socket.on(`doubt:${doubt._id}`, ({ reply, senderId }) => {
         setDoubts(prevDoubts => 
           prevDoubts.map(d => {
             if (d._id === doubt._id) {
+              // Find the student info from the existing doubt
+              const student = d.student;
+              // Create a properly formatted reply object
+              const newReply = {
+                ...reply,
+                sender: reply.sender || {
+                  _id: student._id,
+                  name: student.name,
+                  role: 'student'
+                }
+              };
               return {
                 ...d,
-                replies: [...d.replies, reply]
+                replies: [...d.replies, newReply]
               };
             }
             return d;
@@ -180,6 +222,7 @@ export default function TeacherDashboard() {
     });
 
     return () => {
+      socket.off('newDoubt');
       doubts.forEach(doubt => {
         socket.off(`doubt:${doubt._id}`);
         socket.off(`doubt:${doubt._id}:status`);
