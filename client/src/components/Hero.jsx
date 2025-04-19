@@ -39,12 +39,6 @@ export default function HeroComponent() {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // const handleSearch = (e) => {
-  //   e.preventDefault();
-  //   console.log("Searching for:", searchQuery);
-  //   // Here you would implement actual search functionality
-  // };
-
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-600 to-indigo-700">
       {/* Navbar */}
@@ -64,16 +58,6 @@ export default function HeroComponent() {
                 <Home className="w-4 h-4" />
                 <span>Home</span>
               </Link>
-              {/* <a href="/subjects" className="text-white hover:text-blue-200 flex items-center gap-1">
-                <BookOpen className="w-4 h-4" />
-                <span>Subjects</span>
-              </a>
-              <a href="/ask" className="text-white hover:text-blue-200 flex items-center gap-1">
-                <MessageSquare className="w-4 h-4" />
-                <span>Ask Doubt</span>
-              </a> */}
-              
-              {/* Auth Links */}
               {!isAuthenticated ? (
                 <>
                   <Link to="/login" className="px-4 py-2 rounded-md bg-white text-blue-600 hover:bg-blue-100 flex items-center gap-1">
@@ -114,14 +98,7 @@ export default function HeroComponent() {
                     <Home className="w-4 h-4" />
                     <span>Home</span>
                   </Link>
-                  {/* <a href="/subjects" className="text-blue-600 hover:text-blue-800 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4" />
-                    <span>Subjects</span>
-                  </a>
-                  <a href="/ask" className="text-blue-600 hover:text-blue-800 flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    <span>Ask Doubt</span>
-                  </a> */}
+                  
                   
                   {!isAuthenticated ? (
                     <div className="border-t border-gray-200 pt-2 flex flex-col space-y-2">
@@ -161,36 +138,12 @@ export default function HeroComponent() {
               Connect with experts and peers to solve academic problems in real-time. From math equations to complex science concepts.
             </p>
             
-            {/* Search Bar */}
-            {/* <form onSubmit={handleSearch} className="mb-8">
-              <div className="relative max-w-md mx-auto md:mx-0">
-                <input 
-                  type="text" 
-                  placeholder="Search your doubt..." 
-                  className="w-full px-4 py-3 pl-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <button 
-                  type="submit" 
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white px-4 py-1 rounded-md hover:bg-blue-700"
-                >
-                  Search
-                </button>
-              </div>
-            </form> */}
             
-            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center md:justify-start">
               <Link to="/teachers" className="px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 text-center">
                 Ask a Question
               </Link>
-              {/* <Link to="/browse" className="px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-400 text-center">
-                Browse Topics
-              </Link> */}
+             
             </div>
           </div>
           
@@ -223,6 +176,84 @@ export default function HeroComponent() {
           <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
             <div className="text-2xl sm:text-3xl font-bold text-white">24/7</div>
             <div className="text-sm text-blue-100">Support</div>
+          </div>
+        </div>
+        
+        {/* Reviews Section */}
+        <div className="mt-20">
+          <h2 className="text-3xl font-bold text-white text-center mb-12">What Our Users Say</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Review Card 1 */}
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl transform hover:scale-105 transition-all duration-300">
+              <div className="flex items-center mb-4">
+                <img 
+                  src="https://randomuser.me/api/portraits/women/44.jpg" 
+                  alt="User" 
+                  className="w-12 h-12 rounded-full border-2 border-white"
+                />
+                <div className="ml-4">
+                  <h3 className="text-white font-semibold">Sarah Johnson</h3>
+                  <div className="flex text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-blue-100">
+                "DoubtSolver has been a game-changer for my studies. The teachers are incredibly helpful and patient. I've improved my grades significantly!"
+              </p>
+            </div>
+
+            {/* Review Card 2 */}
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl transform hover:scale-105 transition-all duration-300">
+              <div className="flex items-center mb-4">
+                <img 
+                  src="https://randomuser.me/api/portraits/men/32.jpg" 
+                  alt="User" 
+                  className="w-12 h-12 rounded-full border-2 border-white"
+                />
+                <div className="ml-4">
+                  <h3 className="text-white font-semibold">Michael Chen</h3>
+                  <div className="flex text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-blue-100">
+                "As a teacher, I love how easy it is to connect with students and help them understand complex concepts. The platform is intuitive and efficient."
+              </p>
+            </div>
+
+            {/* Review Card 3 */}
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl transform hover:scale-105 transition-all duration-300">
+              <div className="flex items-center mb-4">
+                <img 
+                  src="https://randomuser.me/api/portraits/women/68.jpg" 
+                  alt="User" 
+                  className="w-12 h-12 rounded-full border-2 border-white"
+                />
+                <div className="ml-4">
+                  <h3 className="text-white font-semibold">Emily Rodriguez</h3>
+                  <div className="flex text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-blue-100">
+                "The 24/7 support is amazing! I can get help with my homework anytime, and the community is so supportive. Highly recommend!"
+              </p>
+            </div>
           </div>
         </div>
       </div>
