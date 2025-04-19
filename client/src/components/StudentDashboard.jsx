@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Clock, CheckCircle, XCircle, Users, Send, ChevronDown, LogOut } from 'lucide-react';
 import { API_ENDPOINTS } from '../config/api';
+import { useSocket } from '../context/SocketContext';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
+  const socket = useSocket();
   const [doubts, setDoubts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,6 +24,70 @@ export default function StudentDashboard() {
   useEffect(() => {
     fetchDoubts();
   }, [navigate]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Join socket room for each doubt
+    doubts.forEach(doubt => {
+      socket.emit('join', { 
+        userId: doubt._id,
+        role: 'student'
+      });
+    });
+
+    // Listen for new replies
+    doubts.forEach(doubt => {
+      socket.on(`doubt:${doubt._id}`, ({ reply, senderId }) => {
+        setDoubts(prevDoubts => 
+          prevDoubts.map(d => {
+            if (d._id === doubt._id) {
+              // Find the teacher info from the existing doubt
+              const teacher = d.teacher;
+              // Create a properly formatted reply object
+              const newReply = {
+                ...reply,
+                sender: reply.sender || {
+                  _id: teacher._id,
+                  name: teacher.name,
+                  role: 'teacher'
+                }
+              };
+              return {
+                ...d,
+                replies: [...d.replies, newReply]
+              };
+            }
+            return d;
+          })
+        );
+      });
+    });
+
+    // Listen for status updates
+    doubts.forEach(doubt => {
+      socket.on(`doubt:${doubt._id}:status`, ({ status }) => {
+        setDoubts(prevDoubts => 
+          prevDoubts.map(d => {
+            if (d._id === doubt._id) {
+              return {
+                ...d,
+                status
+              };
+            }
+            return d;
+          })
+        );
+      });
+    });
+
+    return () => {
+      doubts.forEach(doubt => {
+        socket.off(`doubt:${doubt._id}`);
+        socket.off(`doubt:${doubt._id}:status`);
+      });
+    };
+  }, [socket, doubts]);
 
   const fetchDoubts = async () => {
     try {
@@ -49,7 +115,7 @@ export default function StudentDashboard() {
   };
 
   const handleReplySubmit = async (doubtId) => {
-    if (!replyText.trim()) return;
+    if (!replyText.trim() || !socket) return;
 
     setIsSubmitting(true);
     try {
@@ -63,15 +129,14 @@ export default function StudentDashboard() {
         body: JSON.stringify({ message: replyText })
       });
 
-      if (!response.ok) throw new Error('Failed to submit reply');
-
-      const updatedDoubt = await response.json();
-      setDoubts(doubts.map(d => d._id === doubtId ? updatedDoubt : d));
+      if (!response.ok) throw new Error('Failed to send reply');
+      
+      // The socket event will handle updating the UI
       setReplyText('');
       setReplyingTo(null);
     } catch (err) {
       console.error('Error:', err);
-      alert('Failed to submit reply: ' + err.message);
+      setError(err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -242,26 +307,26 @@ export default function StudentDashboard() {
                                 <div 
                                   key={index}
                                   className={`flex items-start ${
-                                    reply.sender.role === 'teacher' ? 'justify-start' : 'justify-end'
+                                    reply.sender?.role === 'student' ? 'justify-end' : 'justify-start'
                                   }`}
                                 >
                                   <div className={`max-w-[80%] ${
-                                    reply.sender.role === 'teacher' 
+                                    reply.sender?.role === 'student' 
                                       ? 'bg-blue-50 text-blue-700' 
                                       : 'bg-green-50 text-green-700'
                                   } p-4 rounded-lg shadow-sm`}>
                                     <div className="flex items-center space-x-2 mb-1">
                                       <div className={`h-8 w-8 rounded-full ${
-                                        reply.sender.role === 'teacher' ? 'bg-blue-100' : 'bg-green-100'
+                                        reply.sender?.role === 'student' ? 'bg-blue-100' : 'bg-green-100'
                                       } flex items-center justify-center`}>
                                         <span className={`font-medium ${
-                                          reply.sender.role === 'teacher' ? 'text-blue-600' : 'text-green-600'
+                                          reply.sender?.role === 'student' ? 'text-blue-600' : 'text-green-600'
                                         }`}>
-                                          {reply.sender.name.charAt(0)}
+                                          {reply.sender?.name?.[0]?.toUpperCase() || '?'}
                                         </span>
                                       </div>
                                       <span className="text-sm font-medium">
-                                        {reply.sender.name}
+                                        {reply.sender?.name || 'Unknown User'}
                                       </span>
                                     </div>
                                     <p className="text-sm">{reply.message}</p>

@@ -6,10 +6,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator');
 const dotenv = require('dotenv');
+const http = require('http');
+const initializeSocket = require('./socket');
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = initializeSocket(server);
 
 // Middleware
 app.use(express.json());
@@ -19,7 +23,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       'http://localhost:5173', // Development
-      'https://your-netlify-domain.netlify.app' // Production - replace with your actual Netlify domain
+      'http://192.168.163.3:5173' // Production - replace with your actual Netlify domain
     ];
     
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
@@ -439,6 +443,11 @@ app.patch('/api/doubts/:id/status', auth, checkRole('teacher'), async (req, res)
       return res.status(404).json({ message: 'Doubt not found' });
     }
     
+    // Emit socket event for status update
+    io.emit(`doubt:${doubt._id}:status`, {
+      status: doubt.status
+    });
+
     res.json(doubt);
   } catch (err) {
     console.error('Error updating doubt status:', err);
@@ -475,22 +484,43 @@ app.post('/api/doubts/:id/reply', auth, async (req, res) => {
       doubt.status = 'resolved';
     }
 
+    // Get sender info
+    const sender = await User.findById(req.user.id).select('name email role');
+
     // Add the reply
-    doubt.replies.push({
-      sender: req.user.id,
+    const newReply = {
+      sender: sender._id,
       message,
       createdAt: new Date()
-    });
+    };
 
+    doubt.replies.push(newReply);
     await doubt.save();
 
-    // Fetch the updated doubt with all populated fields
-    const updatedDoubt = await Doubt.findById(doubt._id)
+    // Populate the new reply's sender information
+    const populatedDoubt = await Doubt.findById(doubt._id)
       .populate('student', 'name email')
       .populate('teacher', 'name email')
       .populate('replies.sender', 'name email role');
 
-    res.json(updatedDoubt);
+    // Get the newly added reply
+    const latestReply = populatedDoubt.replies[populatedDoubt.replies.length - 1];
+
+    // Emit socket event with complete sender information
+    io.emit(`doubt:${doubt._id}`, {
+      reply: {
+        _id: latestReply._id,
+        message: latestReply.message,
+        createdAt: latestReply.createdAt,
+        sender: {
+          _id: sender._id,
+          name: sender.name,
+          role: sender.role
+        }
+      }
+    });
+
+    res.json(populatedDoubt);
   } catch (err) {
     console.error('Error adding reply:', err);
     res.status(500).json({ message: 'Server error' });
@@ -499,7 +529,7 @@ app.post('/api/doubts/:id/reply', auth, async (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log('\nAvailable endpoints:');
   console.log('Auth Routes:');

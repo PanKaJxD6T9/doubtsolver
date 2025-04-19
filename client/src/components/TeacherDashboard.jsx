@@ -19,9 +19,11 @@ import {
   Send
 } from 'lucide-react';
 import { API_ENDPOINTS } from '../config/api';
+import { useSocket } from '../context/SocketContext';
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
+  const socket = useSocket();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [students, setStudents] = useState([]);
@@ -132,6 +134,59 @@ export default function TeacherDashboard() {
     fetchData();
   }, [navigate]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    // Join socket room for each doubt
+    doubts.forEach(doubt => {
+      socket.emit('join', { 
+        userId: doubt._id,
+        role: 'teacher'
+      });
+    });
+
+    // Listen for new replies
+    doubts.forEach(doubt => {
+      socket.on(`doubt:${doubt._id}`, ({ reply, senderId }) => {
+        setDoubts(prevDoubts => 
+          prevDoubts.map(d => {
+            if (d._id === doubt._id) {
+              return {
+                ...d,
+                replies: [...d.replies, reply]
+              };
+            }
+            return d;
+          })
+        );
+      });
+    });
+
+    // Listen for status updates
+    doubts.forEach(doubt => {
+      socket.on(`doubt:${doubt._id}:status`, ({ status }) => {
+        setDoubts(prevDoubts => 
+          prevDoubts.map(d => {
+            if (d._id === doubt._id) {
+              return {
+                ...d,
+                status
+              };
+            }
+            return d;
+          })
+        );
+      });
+    });
+
+    return () => {
+      doubts.forEach(doubt => {
+        socket.off(`doubt:${doubt._id}`);
+        socket.off(`doubt:${doubt._id}:status`);
+      });
+    };
+  }, [socket, doubts]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -144,7 +199,9 @@ export default function TeacherDashboard() {
     student.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleStatusUpdate = async (doubtId, newStatus) => {
+  const handleStatusUpdate = async (doubtId, status) => {
+    if (!socket) return;
+
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(API_ENDPOINTS.DOUBTS.STATUS(doubtId), {
@@ -153,17 +210,15 @@ export default function TeacherDashboard() {
           'Content-Type': 'application/json',
           'x-auth-token': token
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status })
       });
 
-      if (!response.ok) throw new Error('Failed to update doubt status');
-
-      setDoubts(doubts.map(doubt => 
-        doubt._id === doubtId ? { ...doubt, status: newStatus } : doubt
-      ));
+      if (!response.ok) throw new Error('Failed to update status');
+      
+      // The socket event will handle updating the UI
     } catch (err) {
       console.error('Error:', err);
-      alert('Failed to update status: ' + err.message);
+      setError(err.message);
     }
   };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { SocketProvider } from './context/SocketContext';
 import Hero from './components/Hero';
 import Login from './components/Login';
 import Signup from './components/Signup';
@@ -40,30 +41,32 @@ const ProtectedRoute = ({ element, allowedRole }) => {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Hero />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        
-        {/* Protected routes */}
-        <Route 
-          path="/dashboard/teacher" 
-          element={<ProtectedRoute element={<TeacherDashboard />} allowedRole="teacher" />} 
-        />
-        <Route 
-          path="/teachers" 
-          element={<ProtectedRoute element={<TeachersList />} allowedRole="student" />} 
-        />
-        <Route 
-          path="/dashboard/student" 
-          element={<ProtectedRoute element={<StudentDashboard />} allowedRole="student" />} 
-        />
-        
-        {/* Redirect unmatched routes to home */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </Router>
+    <SocketProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Hero />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          
+          {/* Protected routes */}
+          <Route 
+            path="/dashboard/teacher" 
+            element={<ProtectedRoute element={<TeacherDashboard />} allowedRole="teacher" />} 
+          />
+          <Route 
+            path="/teachers" 
+            element={<ProtectedRoute element={<TeachersList />} allowedRole="student" />} 
+          />
+          <Route 
+            path="/dashboard/student" 
+            element={<ProtectedRoute element={<StudentDashboard />} allowedRole="student" />} 
+          />
+          
+          {/* Redirect unmatched routes to home */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
+    </SocketProvider>
   );
 }
 
