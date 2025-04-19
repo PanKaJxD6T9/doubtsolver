@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, X, BookOpen, Users } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function TeachersList() {
   const navigate = useNavigate();
@@ -26,10 +27,12 @@ export default function TeachersList() {
           return;
         }
 
-        const response = await fetch('http://localhost:5000/api/teachers', {
+        const response = await fetch(API_ENDPOINTS.TEACHERS, {
           headers: {
-            'x-auth-token': token
-          }
+            'x-auth-token': token,
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
         });
 
         if (!response.ok) throw new Error('Failed to fetch teachers');
@@ -54,12 +57,13 @@ export default function TeachersList() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/doubts', {
+      const response = await fetch(API_ENDPOINTS.DOUBTS.BASE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-auth-token': token
         },
+        credentials: 'include',
         body: JSON.stringify({
           teacherId: selectedTeacher._id,
           ...doubtForm

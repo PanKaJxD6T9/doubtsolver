@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 // Login.jsx
 import { Link, useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 
 import { LogIn, AtSign, Lock, AlertCircle } from 'lucide-react';
 
@@ -25,11 +26,12 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
 

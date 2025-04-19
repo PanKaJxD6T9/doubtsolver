@@ -18,6 +18,7 @@ import {
   XCircle,
   Send
 } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
@@ -54,8 +55,10 @@ export default function TeacherDashboard() {
         }
 
         // Fetch teacher data
-        const userResponse = await fetch('http://localhost:5000/api/auth/user', {
-          headers: { 'x-auth-token': token }
+        const userResponse = await fetch(API_ENDPOINTS.AUTH.USER, {
+          headers: {
+            'x-auth-token': token
+          }
         });
 
         if (!userResponse.ok) throw new Error('Failed to fetch user data');
@@ -63,8 +66,10 @@ export default function TeacherDashboard() {
         setUser(userData);
 
         // Fetch dashboard data
-        const dashboardResponse = await fetch('http://localhost:5000/api/dashboard/teacher', {
-          headers: { 'x-auth-token': token }
+        const dashboardResponse = await fetch(API_ENDPOINTS.DASHBOARD.TEACHER, {
+          headers: {
+            'x-auth-token': token
+          }
         });
 
         if (!dashboardResponse.ok) throw new Error('Failed to fetch dashboard data');
@@ -72,8 +77,10 @@ export default function TeacherDashboard() {
         setStats(dashboardData.stats);
 
         // Fetch students list
-        const studentsResponse = await fetch('http://localhost:5000/api/students', {
-          headers: { 'x-auth-token': token }
+        const studentsResponse = await fetch(API_ENDPOINTS.STUDENTS, {
+          headers: {
+            'x-auth-token': token
+          }
         });
 
         if (!studentsResponse.ok) throw new Error('Failed to fetch students');
@@ -81,8 +88,10 @@ export default function TeacherDashboard() {
         setStudents(studentsData);
 
         // Fetch doubts
-        const doubtsResponse = await fetch('http://localhost:5000/api/doubts/teacher', {
-          headers: { 'x-auth-token': token }
+        const doubtsResponse = await fetch(API_ENDPOINTS.DOUBTS.TEACHER, {
+          headers: {
+            'x-auth-token': token
+          }
         });
 
         if (!doubtsResponse.ok) throw new Error('Failed to fetch doubts');
@@ -138,7 +147,7 @@ export default function TeacherDashboard() {
   const handleStatusUpdate = async (doubtId, newStatus) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/doubts/${doubtId}/status`, {
+      const response = await fetch(API_ENDPOINTS.DOUBTS.STATUS(doubtId), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -170,7 +179,7 @@ export default function TeacherDashboard() {
     setIsReplying(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/doubts/${selectedDoubt._id}/reply`, {
+      const response = await fetch(API_ENDPOINTS.DOUBTS.REPLY(selectedDoubt._id), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

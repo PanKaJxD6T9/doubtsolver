@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserPlus, User, AtSign, Lock, AlertCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -39,11 +40,12 @@ export default function Signup() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/signup', {
+      const res = await fetch(API_ENDPOINTS.AUTH.SIGNUP, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           name,
           email,

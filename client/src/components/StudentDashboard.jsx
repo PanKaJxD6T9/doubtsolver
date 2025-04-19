@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Clock, CheckCircle, XCircle, Users, Send, ChevronDown, LogOut } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function StudentDashboard() {
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/doubts/student', {
+      const response = await fetch(API_ENDPOINTS.DOUBTS.STUDENT, {
         headers: {
           'x-auth-token': token
         }
@@ -53,7 +54,7 @@ export default function StudentDashboard() {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/doubts/${doubtId}/reply`, {
+      const response = await fetch(API_ENDPOINTS.DOUBTS.REPLY(doubtId), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

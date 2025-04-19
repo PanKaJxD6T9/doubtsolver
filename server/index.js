@@ -5,18 +5,38 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { check, validationResult } = require('express-validator');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: 'http://localhost:5173', // Your React app URL
-  credentials: true
-}));
+
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173', // Development
+      'https://your-netlify-domain.netlify.app' // Production - replace with your actual Netlify domain
+    ];
+    
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
+};
+
+app.use(cors(corsOptions));
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://workpankaj01:pankaj00sh@cluster0.08ygkmm.mongodb.net/', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
